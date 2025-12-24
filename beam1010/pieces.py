@@ -3,9 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Mapping, Sequence, Tuple
 
-
 Shape = Tuple[Tuple[int, ...], ...]
-
 
 @dataclass(frozen=True, slots=True)
 class Piece:

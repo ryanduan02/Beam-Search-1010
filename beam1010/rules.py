@@ -5,7 +5,6 @@ from typing import Tuple
 from .pieces import Piece
 from .state import Board, GameState
 
-
 def can_place(board: Board, piece: Piece, row: int, col: int) -> bool:
     """True if `piece` fits at (row, col) without overlap."""
     for i in range(piece.height):
@@ -22,7 +21,6 @@ def can_place(board: Board, piece: Piece, row: int, col: int) -> bool:
                 return False
     return True
 
-
 def place_piece(board: Board, piece: Piece, row: int, col: int, value: int = 1) -> Board:
     """Return a new board with `piece` placed at (row, col)."""
     if not can_place(board, piece, row, col):
@@ -34,7 +32,6 @@ def place_piece(board: Board, piece: Piece, row: int, col: int, value: int = 1) 
             if piece.shape[i][j] == 1:
                 grid[row + i][col + j] = value
     return tuple(tuple(r) for r in grid)
-
 
 def clear_lines(board: Board) -> tuple[Board, int, int, int]:
     """Clear full rows/cols. Returns (new_board, cells, rows, cols)."""
@@ -65,11 +62,9 @@ def clear_lines(board: Board) -> tuple[Board, int, int, int]:
     new_board = tuple(tuple(r) for r in grid)
     return new_board, cells_cleared, len(full_rows), len(full_cols)
 
-
 def score_delta(piece: Piece, cleared_cells: int) -> int:
     """Matches `game.py`: placed blocks + cleared cells."""
     return piece.block_count + cleared_cells
-
 
 def apply_move(state: GameState, hand_index: int, row: int, col: int) -> Tuple[GameState, int, int, int]:
     """Apply placing `state.hand[hand_index]` at (row, col).

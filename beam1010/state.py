@@ -5,15 +5,12 @@ from typing import Iterable, Mapping, Sequence, Tuple
 
 from .pieces import Piece
 
-
 Board = Tuple[Tuple[int, ...], ...]  # 0 = empty, non-zero = filled
-
 
 def empty_board(size: int = 10) -> Board:
     if size <= 0:
         raise ValueError("size must be positive")
     return tuple(tuple(0 for _ in range(size)) for _ in range(size))
-
 
 def board_from_rows(rows: Sequence[Sequence[int]]) -> Board:
     if len(rows) == 0:
@@ -36,7 +33,6 @@ def board_from_rows(rows: Sequence[Sequence[int]]) -> Board:
             normalized_row.append(int(cell))
         normalized.append(tuple(normalized_row))
     return tuple(normalized)
-
 
 @dataclass(frozen=True, slots=True)
 class GameState:
@@ -96,7 +92,6 @@ class GameState:
         board_list = [list(row) for row in self.board]
         hand_list = [p.to_dict() for p in self.hand]
         return board_list, int(self.score), hand_list
-
 
 def _validate_board(board: Board) -> None:
     if len(board) == 0:
