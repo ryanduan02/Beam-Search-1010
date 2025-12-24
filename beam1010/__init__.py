@@ -7,5 +7,6 @@ new random hand and run search again.
 
 from .pieces import Piece
 from .state import GameState
+from .moves import Move, legal_moves
 
-__all__ = ["GameState", "Piece"]
+__all__ = ["GameState", "Piece", "Move", "legal_moves"]
