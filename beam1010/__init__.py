@@ -9,6 +9,7 @@ from .pieces import Piece
 from .state import GameState
 from .moves import Move, legal_moves
 from .heuristics import DEFAULT_WEIGHTS, HeuristicWeights, evaluate
+from .beam_search import BeamSearchParams, beam_search_best_sequence, select_best_move
 
 __all__ = [
     "GameState",
@@ -18,4 +19,7 @@ __all__ = [
     "HeuristicWeights",
     "DEFAULT_WEIGHTS",
     "evaluate",
+    "BeamSearchParams",
+    "beam_search_best_sequence",
+    "select_best_move",
 ]
