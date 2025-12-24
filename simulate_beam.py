@@ -9,6 +9,9 @@ Examples:
   python3 simulate_beam.py --games 50 --seed 0 --beam-width 25 --out runs.jsonl
   python3 simulate_beam.py --games 10 --seed 123 --beam-width 50 --mobility 0.2 --near-full-lines 1.5 --roughness -0.1
 
+Pretty (multi-line) JSON output:
+    python3 simulate_beam.py --games 1 --seed 0 --beam-width 25 --format json --out runs/one.json
+
 Output format: JSON Lines (one JSON object per game).
 """
 
@@ -138,6 +141,18 @@ def main() -> None:
         default=None,
         help="Write JSONL to this file (default: stdout)",
     )
+    p.add_argument(
+        "--format",
+        choices=("jsonl", "json"),
+        default="jsonl",
+        help="Output format: jsonl (default) writes one compact JSON object per line; json writes a single pretty-printed JSON array.",
+    )
+    p.add_argument(
+        "--indent",
+        type=int,
+        default=2,
+        help="Indent level for --format json (ignored for jsonl).",
+    )
 
     # Simple weight overrides.
     p.add_argument("--mobility", type=float, default=None)
@@ -167,19 +182,31 @@ def main() -> None:
 
     out_f = open(args.out, "w", encoding="utf-8") if args.out else None
     try:
+        results: List[Dict[str, Any]] = []
         for i in range(args.games):
             run_seed = args.seed + i
-            result = run_game(
-                seed=run_seed,
-                beam_width=args.beam_width,
-                weights=weights,
-                max_moves=args.max_moves,
+            results.append(
+                run_game(
+                    seed=run_seed,
+                    beam_width=args.beam_width,
+                    weights=weights,
+                    max_moves=args.max_moves,
+                )
             )
-            line = json.dumps(result)
+
+        if args.format == "jsonl":
+            for result in results:
+                line = json.dumps(result)
+                if out_f:
+                    out_f.write(line + "\n")
+                else:
+                    print(line)
+        else:
+            payload = json.dumps(results, indent=args.indent)
             if out_f:
-                out_f.write(line + "\n")
+                out_f.write(payload + "\n")
             else:
-                print(line)
+                print(payload)
     finally:
         if out_f:
             out_f.close()
