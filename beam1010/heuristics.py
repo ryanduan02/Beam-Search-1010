@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections import deque
+from dataclasses import dataclass
+from functools import lru_cache
 from typing import Iterable
 
 from .moves import legal_moves
@@ -62,7 +63,15 @@ def evaluate(state: GameState, weights: HeuristicWeights = DEFAULT_WEIGHTS) -> f
 
 def mobility(state: GameState) -> int:
     """Count of legal placements across the remaining hand."""
-    return sum(1 for _ in legal_moves(state))
+    return _mobility_cached(state.board, state.hand)
+
+
+@lru_cache(maxsize=50_000)
+def _mobility_cached(board: Board, hand) -> int:
+    # `hand` is a tuple[Piece, ...] (hashable). We keep the signature generic so
+    # the cache key stays stable even if typing changes.
+    tmp_state = GameState(board=board, score=0, hand=hand)
+    return sum(1 for _ in legal_moves(tmp_state))
 
 
 def near_full_lines(board: Board, *, lo: int = 8, hi: int = 9) -> int:
@@ -71,6 +80,11 @@ def near_full_lines(board: Board, *, lo: int = 8, hi: int = 9) -> int:
     By default counts lines with 8–9 filled cells (on a 10-wide board).
     """
 
+    return _near_full_lines_cached(board, lo, hi)
+
+
+@lru_cache(maxsize=50_000)
+def _near_full_lines_cached(board: Board, lo: int, hi: int) -> int:
     height = len(board)
     width = len(board[0])
 
@@ -96,6 +110,11 @@ def roughness(board: Board) -> int:
     More transitions usually means more irregular shapes (worse).
     """
 
+    return _roughness_cached(board)
+
+
+@lru_cache(maxsize=50_000)
+def _roughness_cached(board: Board) -> int:
     height = len(board)
     width = len(board[0])
 
