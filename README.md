@@ -24,6 +24,10 @@ Run a single simulated game (beam search runs every hand):
 python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --out runs/one.jsonl
 ```
 
+If you pass `--out`, the simulator also writes a compact moves-only sidecar file next to it:
+- `runs/one.jsonl` -> `runs/one.moves.json`
+- `runs/one.json` -> `runs/one.moves.json`
+
 If you want a multi-line, human-readable file, write JSON instead of JSONL:
 
 ```bash
@@ -76,6 +80,40 @@ Each move object contains both the **hand index** and the **piece itself**:
 }
 ```
 
+### Moves-only sidecar output (`*.moves.json`)
+
+The sidecar file is meant to be easy to parse for downstream analysis.
+
+- It is written automatically when `--out` is provided.
+- You can override the path with `--moves-out path/to/file.json`.
+
+Schema:
+
+- If `--games 1`: a JSON array of move objects:
+
+```json
+{
+	"piece_index": 0,
+	"piece_name": "plus",
+	"row": 3,
+	"col": 5,
+	"score_after": 123
+}
+```
+
+- If `--games N` (N>1): a JSON array of game objects:
+
+```json
+{
+	"seed": 0,
+	"moves": [
+		{"piece_index": 0, "piece_name": "plus", "row": 3, "col": 5, "score_after": 123}
+	]
+}
+```
+
+Note: the sidecar intentionally omits full piece shapes; the main output includes `piece` (name + shape).
+
 ## Print a simple per-move log (move + score)
 
 If you want a quick “turn-by-turn” log from a pretty JSON run:
@@ -87,10 +125,10 @@ import json
 game = json.load(open('runs/one.json','r',encoding='utf-8'))[0]
 turn = 0
 for seg in game['segments']:
-		for m in seg['moves']:
-				turn += 1
-				mv = m['move']
-				print(f"{turn:04d} {mv['piece_name']} @ ({mv['row']},{mv['col']}) score={m['score_after']}")
+    for m in seg['moves']:
+        turn += 1
+        mv = m['move']
+        print(f"{turn:04d} {mv['piece_name']} @ ({mv['row']},{mv['col']}) score={m['score_after']}")
 PY
 ```
 

@@ -123,6 +123,32 @@ def run_game(
     }
 
 
+def extract_executed_moves(game_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Return a flat list of executed move dicts for a single game.
+
+    Each entry matches the move dict stored at:
+        game_result['segments'][i]['moves'][j]['move']
+    """
+
+    out: List[Dict[str, Any]] = []
+    for segment in game_result.get("segments", []):
+        for move_info in segment.get("moves", []):
+            mv = move_info.get("move")
+            score_after = move_info.get("score_after")
+            if isinstance(mv, dict):
+                # Keep the sidecar compact: omit full piece shapes.
+                entry = {
+                    "piece_index": mv.get("piece_index"),
+                    "piece_name": mv.get("piece_name"),
+                    "row": mv.get("row"),
+                    "col": mv.get("col"),
+                }
+                if score_after is not None:
+                    entry["score_after"] = int(score_after)
+                out.append(entry)
+    return out
+
+
 def _move_to_dict(state: GameState, m: Move) -> Dict[str, Any]:
     piece_dict: Optional[dict] = None
     piece_name: Optional[str] = None
@@ -152,7 +178,7 @@ def main() -> None:
         "--out",
         type=str,
         default=None,
-        help="Write JSONL to this file (default: stdout)",
+        help="Write output to this file (default: stdout)",
     )
     p.add_argument(
         "--format",
@@ -165,6 +191,17 @@ def main() -> None:
         type=int,
         default=2,
         help="Indent level for --format json (ignored for jsonl).",
+    )
+
+    p.add_argument(
+        "--moves-out",
+        type=str,
+        default=None,
+        help=(
+            "Optional sidecar output path for moves-only JSON. "
+            "If omitted and --out is provided, defaults to '<out_basename>.moves.json'. "
+            "If omitted and --out is not provided, no moves-only file is written."
+        ),
     )
 
     # Simple weight overrides.
@@ -194,6 +231,22 @@ def main() -> None:
     )
 
     out_f = open(args.out, "w", encoding="utf-8") if args.out else None
+
+    moves_out_path: Optional[str] = None
+    if args.moves_out is not None:
+        moves_out_path = args.moves_out
+    elif args.out:
+        # Derive a stable sidecar name next to the main output.
+        base = args.out
+        if base.endswith(".jsonl"):
+            base = base[: -len(".jsonl")]
+        elif base.endswith(".json"):
+            base = base[: -len(".json")]
+        moves_out_path = base + ".moves.json"
+
+    moves_out_f = (
+        open(moves_out_path, "w", encoding="utf-8") if moves_out_path else None
+    )
     try:
         results: List[Dict[str, Any]] = []
         for i in range(args.games):
@@ -206,6 +259,23 @@ def main() -> None:
                     max_moves=args.max_moves,
                 )
             )
+
+        if moves_out_f:
+            # For 1 game, write a flat list of moves.
+            # For N games, write a list of {seed, moves} objects.
+            if len(results) == 1:
+                payload = json.dumps(
+                    extract_executed_moves(results[0]), indent=args.indent
+                )
+            else:
+                payload = json.dumps(
+                    [
+                        {"seed": r.get("seed"), "moves": extract_executed_moves(r)}
+                        for r in results
+                    ],
+                    indent=args.indent,
+                )
+            moves_out_f.write(payload + "\n")
 
         if args.format == "jsonl":
             for result in results:
@@ -223,6 +293,8 @@ def main() -> None:
     finally:
         if out_f:
             out_f.close()
+        if moves_out_f:
+            moves_out_f.close()
 
 
 if __name__ == "__main__":
