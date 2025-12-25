@@ -88,10 +88,10 @@ def run_game(
             )
             after_eval = evaluate(next_state, weights)
 
-            segment["planned_moves"].append(_move_to_dict(mv))
+            segment["planned_moves"].append(_move_to_dict(state, mv))
             segment["moves"].append(
                 {
-                    "move": _move_to_dict(mv),
+                    "move": _move_to_dict(state, mv),
                     "delta": delta,
                     "cleared_cells": cleared_cells,
                     "rows_cleared": rows_cleared,
@@ -123,8 +123,21 @@ def run_game(
     }
 
 
-def _move_to_dict(m: Move) -> Dict[str, int]:
-    return {"piece_index": m.piece_index, "row": m.row, "col": m.col}
+def _move_to_dict(state: GameState, m: Move) -> Dict[str, Any]:
+    piece_dict: Optional[dict] = None
+    piece_name: Optional[str] = None
+    if 0 <= m.piece_index < len(state.hand):
+        piece = state.hand[m.piece_index]
+        piece_dict = piece.to_dict()
+        piece_name = piece.name
+
+    return {
+        "piece_index": m.piece_index,
+        "piece_name": piece_name,
+        "piece": piece_dict,
+        "row": m.row,
+        "col": m.col,
+    }
 
 
 def main() -> None:
