@@ -28,11 +28,19 @@ If you pass `--out`, the simulator also writes a compact moves-only sidecar file
 - `runs/one.jsonl` -> `runs/one.moves.json`
 - `runs/one.json` -> `runs/one.moves.json`
 
-If you want to print JSON and moves:
+Tip: avoid naming your main output `*.moves.json`.
+The `*.moves.json` suffix is reserved for the *sidecar* file name.
 
+create game with json output:
 ```
-python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --max-moves 10 --format json --out runs/ten_moves.moves.json
+python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --format json --out runs/one.json
 ```
+
+Replay game
+```
+python3 game.py --replay runs/one.json
+```
+
 
 If you want a multi-line, human-readable file, write JSON instead of JSONL:
 
@@ -45,6 +53,10 @@ Limit the run to a small number of placements (useful for debugging):
 ```bash
 python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --max-moves 10 --format json --out runs/ten_moves.json
 ```
+
+That command also produces the moves-only sidecar:
+
+- `runs/ten_moves.moves.json`
 
 ## What “running beam search” means here
 
@@ -158,29 +170,43 @@ There is also a simple console version (manual play):
 python3 game.py
 ```
 
-## Replay a saved JSON run (actually apply the recorded moves)
+## Replay a saved run (step through moves)
 
-You can replay either:
+Use the replay mode in `game.py` to apply recorded moves one-by-one from a simulator output file.
 
-- the **main** simulator output (contains hands + rich telemetry), e.g. `runs/one.json` or `runs/one.jsonl`, or
-- the compact **moves-only** sidecar file `*.moves.json`.
+It supports both:
+
+- the **main** simulator output (recommended; contains hands + piece shapes)
+- the compact **moves-only** sidecar (`*.moves.json`) (best-effort; may not include shapes)
 
 Examples:
 
 ```bash
-# Replay the full output (recommended; hands are explicit)
-python3 replay_moves.py runs/ten_moves.json
+# Replay the full output (recommended)
+python3 game.py --replay runs/ten_moves.json
 
-# Replay the sidecar moves-only file (hand inferred from piece_index + piece_name)
-python3 replay_moves.py runs/ten_moves.moves.json
+# Replay the moves-only sidecar
+python3 game.py --replay runs/ten_moves.moves.json
 
-# Interactive terminal replay (step forward/back)
-python3 replay_moves.py runs/ten_moves.moves.json --interactive
+# If the file contains multiple games (JSON array), pick one
+python3 game.py --replay runs/many.json --game-index 3
 ```
+
+Controls at the prompt:
+
+- Press Enter (or type `next` / `n`) to advance one move
+- Type `q` to quit
+- Type `?` for help
 
 ## Tests
 
 Run all tests:
+
+```bash
+pytest -q
+```
+
+If you don't have `pytest` installed, you can also run them with the standard library:
 
 ```bash
 python3 -m unittest discover -s tests -p "test_*.py"
