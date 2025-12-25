@@ -3,6 +3,9 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Project outputs
+runs/
+
 # C extensions
 *.so
 
