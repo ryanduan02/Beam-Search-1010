@@ -28,6 +28,12 @@ If you pass `--out`, the simulator also writes a compact moves-only sidecar file
 - `runs/one.jsonl` -> `runs/one.moves.json`
 - `runs/one.json` -> `runs/one.moves.json`
 
+If you want to print JSON and moves:
+
+```
+python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --max-moves 10 --format json --out runs/ten_moves.moves.json
+```
+
 If you want a multi-line, human-readable file, write JSON instead of JSONL:
 
 ```bash
@@ -150,6 +156,26 @@ There is also a simple console version (manual play):
 
 ```bash
 python3 game.py
+```
+
+## Replay a saved JSON run (actually apply the recorded moves)
+
+You can replay either:
+
+- the **main** simulator output (contains hands + rich telemetry), e.g. `runs/one.json` or `runs/one.jsonl`, or
+- the compact **moves-only** sidecar file `*.moves.json`.
+
+Examples:
+
+```bash
+# Replay the full output (recommended; hands are explicit)
+python3 replay_moves.py runs/ten_moves.json
+
+# Replay the sidecar moves-only file (hand inferred from piece_index + piece_name)
+python3 replay_moves.py runs/ten_moves.moves.json
+
+# Interactive terminal replay (step forward/back)
+python3 replay_moves.py runs/ten_moves.moves.json --interactive
 ```
 
 ## Tests
