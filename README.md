@@ -10,6 +10,8 @@ This repo contains:
 	2) runs beam search to plan the best sequence for that hand
 	3) applies the planned moves and records rich telemetry to JSON
 
+- An experimentation setup to run simulations automatically.
+
 The simulator json output is meant for inspecting / tuning heuristic weights.
 
 ## Requirements
@@ -21,7 +23,13 @@ The simulator json output is meant for inspecting / tuning heuristic weights.
 Run a single simulated game (beam search runs every hand):
 
 ```bash
-python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --out runs/one.jsonl
+python3 simulate_beam.py --games number_of_games --seed integer --beam-width integer --out directory/name.jsonl
+```
+
+Run an experiment
+
+```bash
+python3 experiment.py --games nimber_of_games --beam-width integer --max-moves optional integer --out-dir runs/_exp_rand --sidecar false
 ```
 
 The moves-only sidecar file (`*.moves.json`) is optional.
@@ -261,4 +269,5 @@ python3 -m unittest discover -s tests -p "test_*.py"
 	- `beam_search.py` — beam search implementation
 - `simulate_beam.py` — offline simulator + JSON/JSONL output
 - `game.py` — interactive console game + piece catalog used by the simulator
+- `experiment.py` - offline simulator automating simulation process
 
