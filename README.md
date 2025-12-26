@@ -24,19 +24,37 @@ Run a single simulated game (beam search runs every hand):
 python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --out runs/one.jsonl
 ```
 
-If you pass `--out`, the simulator also writes a compact moves-only sidecar file next to it:
-- `runs/one.jsonl` -> `runs/one.moves.json`
-- `runs/one.json` -> `runs/one.moves.json`
+The moves-only sidecar file (`*.moves.json`) is optional.
+
+To write it next to `--out`, pass `--write-moves-sidecar`:
+
+```bash
+python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --out runs/one.jsonl --write-moves-sidecar
+```
+
+Or choose an explicit path with `--moves-out`:
+
+```bash
+python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --out runs/one.jsonl --moves-out runs/one.moves.json
+```
 
 Tip: avoid naming your main output `*.moves.json`.
 The `*.moves.json` suffix is reserved for the *sidecar* file name.
 
 create game with json output:
+
 ```
 python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --format json --out runs/one.json
 ```
 
+for sidecar too:
+
+```
+python3 simulate_beam.py --games 1 --seed 0 --beam-width 10 --format json --out runs/_tmp_two.json --write-moves-sidecar
+```
+
 Replay game
+
 ```
 python3 game.py --replay runs/one.json
 ```
@@ -102,7 +120,7 @@ Each move object contains both the **hand index** and the **piece itself**:
 
 The sidecar file is meant to be easy to parse for downstream analysis.
 
-- It is written automatically when `--out` is provided.
+- It is written only when you pass `--write-moves-sidecar` or `--moves-out ...`.
 - You can override the path with `--moves-out path/to/file.json`.
 
 Schema:

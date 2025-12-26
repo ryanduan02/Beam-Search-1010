@@ -199,8 +199,16 @@ def main() -> None:
         default=None,
         help=(
             "Optional sidecar output path for moves-only JSON. "
-            "If omitted and --out is provided, defaults to '<out_basename>.moves.json'. "
-            "If omitted and --out is not provided, no moves-only file is written."
+            "If omitted, no moves-only sidecar file is written."
+        ),
+    )
+
+    p.add_argument(
+        "--write-moves-sidecar",
+        action="store_true",
+        help=(
+            "Write a moves-only sidecar next to --out (defaults to '<out_basename>.moves.json'). "
+            "Ignored if --out is not provided."
         ),
     )
 
@@ -235,7 +243,7 @@ def main() -> None:
     moves_out_path: Optional[str] = None
     if args.moves_out is not None:
         moves_out_path = args.moves_out
-    elif args.out:
+    elif args.write_moves_sidecar and args.out:
         # Derive a stable sidecar name next to the main output.
         base = args.out
         if base.endswith(".jsonl"):
