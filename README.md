@@ -59,6 +59,27 @@ Replay game
 python3 game.py --replay runs/one.json
 ```
 
+## Run an experiment (one file per seed)
+
+If you want *one output file per game* (instead of a single JSON/JSONL file containing many games), use `experiment.py`.
+
+By default (when `--seed` is omitted) it generates a **random seed per game** and writes:
+
+- `SeedXXXXX.json`
+- `SeedXXXXX.moves.json` (only if `--sidecar true`)
+
+Example:
+
+```bash
+python3 experiment.py --games 10 --beam-width 25 --out-dir runs/exp --sidecar true
+```
+
+If you want reproducible experiments, pass a base seed (game i uses `seed+i`):
+
+```bash
+python3 experiment.py --games 10 --seed 0 --beam-width 25 --out-dir runs/exp --sidecar true
+```
+
 
 If you want a multi-line, human-readable file, write JSON instead of JSONL:
 
